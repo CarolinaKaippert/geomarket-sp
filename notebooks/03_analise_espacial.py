@@ -16,7 +16,7 @@ for col in merged.columns:
     if "dt_" in col:
         merged = merged.drop(columns=[col])
 
-# =========================
+# ========================= 
 # AGRUPAR REGIÕES
 # =========================
 
@@ -181,10 +181,10 @@ colormap_regioes.add_to(m)
 # =========================
 
 cores_cluster = {
-    1: "red",
-    2: "blue",
-    3: "green",
-    4: "purple"
+    1: "#0068c9" ,
+    2: "#83c9ff",
+    3: "#ff2b2b",
+    4: "#ffabab"
 }
 
 grupo_clusters = folium.FeatureGroup(
@@ -244,33 +244,33 @@ padding: 10px;
 
 <b>Clusters Comerciais</b><br>
 
-<i style="background:red;
+<i style="background: #83c9ff;
 width:10px;
 height:10px;
 float:left;
 margin-right:8px;"></i>
-Centro Comercial Consolidado<br>
+Baixa Atratividade Comercial<br>
 
-<i style="background:blue;
+<i style="background: #0068c9;
 width:10px;
 height:10px;
 float:left;
 margin-right:8px;"></i>
 Zona Residencial Densa<br>
 
-<i style="background:green;
+<i style="background: #ffabab;
 width:10px;
 height:10px;
 float:left;
 margin-right:8px;"></i>
-Área de Expansão Promissora<br>
+Centro Comercial Consolidado<br>
 
-<i style="background:purple;
+<i style="background: #ff2b2b;
 width:10px;
 height:10px;
 float:left;
 margin-right:8px;"></i>
-Baixa Atratividade Comercial
+Área de Expansão Promissora
 
 </div>
 """
@@ -278,6 +278,7 @@ Baixa Atratividade Comercial
 m.get_root().html.add_child(
     folium.Element(legenda_clusters)
 )
+
 
 
 # =========================

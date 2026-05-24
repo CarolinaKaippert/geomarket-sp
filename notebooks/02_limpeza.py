@@ -1,5 +1,6 @@
 import geopandas as gpd
 import pandas as pd
+
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
@@ -40,36 +41,52 @@ merged["densidade"] = (
 # =========================
 
 merged["densidade_norm"] = (
-    (merged["densidade"] - merged["densidade"].min())
-    / (
+    (
+        merged["densidade"]
+        - merged["densidade"].min()
+    )
+    /
+    (
         merged["densidade"].max()
         - merged["densidade"].min()
     )
-)
+) * 100
 
 merged["renda_norm"] = (
-    (merged["renda"] - merged["renda"].min())
-    / (
+    (
+        merged["renda"]
+        - merged["renda"].min()
+    )
+    /
+    (
         merged["renda"].max()
         - merged["renda"].min()
     )
-)
+) * 100
 
 merged["fluxo_norm"] = (
-    (merged["fluxo"] - merged["fluxo"].min())
-    / (
+    (
+        merged["fluxo"]
+        - merged["fluxo"].min()
+    )
+    /
+    (
         merged["fluxo"].max()
         - merged["fluxo"].min()
     )
-)
+) * 100
 
 merged["concorrencia_norm"] = (
-    (merged["concorrencia"] - merged["concorrencia"].min())
-    / (
+    (
+        merged["concorrencia"]
+        - merged["concorrencia"].min()
+    )
+    /
+    (
         merged["concorrencia"].max()
         - merged["concorrencia"].min()
     )
-)
+) * 100
 
 # =========================
 # ÍNDICE DE ATRATIVIDADE
@@ -87,12 +104,20 @@ merged["atratividade_raw"] = (
 # =========================
 
 minimo = merged["atratividade_raw"].min()
+
 maximo = merged["atratividade_raw"].max()
 
 merged["atratividade"] = (
     (
-        (merged["atratividade_raw"] - minimo)
-        / (maximo - minimo)
+        (
+            merged["atratividade_raw"]
+            - minimo
+        )
+        /
+        (
+            maximo
+            - minimo
+        )
     ) * 99 + 1
 ).round(0)
 
@@ -157,61 +182,133 @@ analise_regiao.to_csv(
 
 variaveis_cluster = merged[
     [
-        "densidade",
-        "renda",
-        "fluxo",
-        "concorrencia",
-        "atratividade"
+        "densidade_norm",
+        "renda_norm",
+        "fluxo_norm",
+        "concorrencia_norm"
     ]
 ]
 
-# padronizar dados
+# =========================
+# PADRONIZAÇÃO
+# =========================
+
 scaler = StandardScaler()
 
 dados_padronizados = scaler.fit_transform(
     variaveis_cluster
 )
 
-# criar modelo
+# =========================
+# MODELO KMEANS
+# =========================
+
 kmeans = KMeans(
     n_clusters=4,
     random_state=42,
     n_init=10
 )
 
-# gerar clusters
+# =========================
+# GERAR CLUSTERS
+# =========================
+
 merged["cluster"] = kmeans.fit_predict(
     dados_padronizados
 )
 
 # converter para 1-4
-merged["cluster"] = merged["cluster"] + 1
+merged["cluster"] = (
+    merged["cluster"] + 1
+)
+
+# =========================
+# ANÁLISE DOS CLUSTERS
+# =========================
+
+analise_clusters = merged.groupby(
+    "cluster"
+)[
+    [
+        "densidade_norm",
+        "renda_norm",
+        "fluxo_norm",
+        "concorrencia_norm",
+        "atratividade"
+    ]
+].mean().round(2)
+
+# =========================
+# RANKING RELATIVO DOS CLUSTERS
+# =========================
+
+analise_clusters = merged.groupby(
+    "cluster"
+)[
+    [
+        "densidade_norm",
+        "renda_norm",
+        "fluxo_norm",
+        "concorrencia_norm",
+        "atratividade"
+    ]
+].mean().round(2)
+
+
+# =========================
+# IDENTIFICAR CLUSTERS
+# =========================
+
+cluster_premium = analise_clusters[
+    "atratividade"
+].idxmax()
+
+cluster_baixa = analise_clusters[
+    "atratividade"
+].idxmin()
+
+cluster_expansao = analise_clusters[
+    "concorrencia_norm"
+].idxmin()
+
+# remover já classificados
+restantes = analise_clusters.index.difference(
+    [
+        cluster_premium,
+        cluster_baixa,
+        cluster_expansao
+    ]
+)
+
+cluster_residencial = restantes[0]
 
 # =========================
 # NOMES DOS CLUSTERS
 # =========================
 
 nomes_clusters = {
-    1: "Centro Comercial Consolidado",
-    2: "Zona Residencial Densa",
-    3: "Área de Expansão Promissora",
-    4: "Baixa Atratividade Comercial"
+    cluster_premium:
+        "Centro Comercial Consolidado",
+
+    cluster_expansao:
+        "Área de Expansão Promissora",
+
+    cluster_residencial:
+        "Zona Residencial Densa",
+
+    cluster_baixa:
+        "Baixa Atratividade Comercial"
 }
 
-merged["tipo_cluster"] = merged["cluster"].map(
+# =========================
+# APLICAR NOMES
+# =========================
+
+merged["tipo_cluster"] = merged[
+    "cluster"
+].map(
     nomes_clusters
 )
-
-# analisar médias dos clusters
-analise_clusters = merged.groupby("cluster")[
-    [
-        "densidade",
-        "renda",
-        "fluxo",
-        "concorrencia",
-        "atratividade"
-    ]
-].mean().round(2)
 
 # =========================
 # EXPORTAR GEOJSON FINAL
@@ -226,5 +323,5 @@ merged.to_file(
 # STATUS
 # =========================
 
-print("Dados processados com sucesso!")
-print(f"{len(merged)} distritos processados.")
+print("\nDados processados com sucesso!")
+ 
