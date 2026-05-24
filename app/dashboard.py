@@ -410,3 +410,16 @@ st.components.v1.html(
     mapa_html,
     height=700
 )
+
+# =========================
+# TEXTO FINAL
+# =========================
+
+st.subheader("🔍 Considerações Finais")
+
+st.write("""Para mais informações sobre o projeto, oportunidades profissionais ou colaborações, entre em contato:
+
+📧 Email: ckaippertn@gmail.com
+💼 LinkedIn: www.linkedin.com/in/carolina-kaippert-309257184
+
+O projeto foi desenvolvido com foco em aplicações reais de geomarketing, análise espacial e inteligência comercial utilizando Python, GeoPandas, Folium, Streamlit e técnicas de machine learning. O código completo está disponível no GitHub para consulta e aprendizado: github.com/seuusuario/geomarket-sp. O objetivo é compartilhar conhecimento e fomentar o uso de dados geográficos para apoiar decisões estratégicas de negócios e expansão urbana.""")
